@@ -1,0 +1,91 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <title>실시간 채팅방</title>
+  <style>
+    /* 아주 간단한 채팅방 디자인 요소 */
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      margin-bottom: 40px;
+    }
+
+    #messages li {
+      padding: 8px;
+      margin-bottom: 5px;
+      background-color: #f3f3f3;
+      border-radius: 5px;
+    }
+
+    #input {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>웹소켓 실시간 채팅방 💬</h2>
+
+  <!-- 채팅 메시지가 쌓일 공간 -->
+  <ul id="messages"></ul>
+
+  <!-- 메시지 입력 폼 -->
+  <form id="form">
+    <input id="input" autocomplete="off" placeholder="메시지를 입력하세요..." />
+    <button type="submit">전송</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+
+    // 1. 폼(전송 버튼)을 제출했을 때 실행되는 로직
+    form.addEventListener('submit', (e) => {
+      e.preventDefault(); // 새로고침 방지
+      if (input.value) {
+        // 서버로 'chat message'라는 이름표를 달아서 입력한 글자를 보냄!
+        socket.emit('chat message', input.value);
+        input.value = ''; // 입력창 비우기
+      }
+    });
+
+    // 2. 서버로부터 'chat message'라는 이름표가 달린 데이터를 받았을 때 실행되는 로직
+    socket.on('chat message', (msg) => {
+      const item = document.createElement('li');
+      item.textContent = msg; // 받은 메시지를 <li> 태그에 넣고
+      messages.appendChild(item); // 화면에 추가!
+      window.scrollTo(0, document.body.scrollHeight); // 스크롤 맨 아래로
+    });
+  </script>
+</body>
+
+</html>
